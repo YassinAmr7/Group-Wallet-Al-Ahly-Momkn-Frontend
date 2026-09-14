@@ -1,19 +1,33 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { setActiveUserId } from "../api/axiosConfig";
+import api from "../api/axiosConfig"; // Import our axios instance
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // We will default to Khaled (ID: 1)
   const [currentUser, setCurrentUser] = useState({ id: 1, name: "Khaled" });
 
-  // A list of our pre-made users from data.sql
-  const availableUsers = [
-    { id: 1, name: "Khaled" },
-    { id: 2, name: "Junior Intern" },
-    { id: 3, name: "Team Lead" },
-  ];
+  const [availableUsers, setAvailableUsers] = useState([]);
 
+  useEffect(() => {
+    api
+      .get("/api/users")
+      .then((response) => {
+        setAvailableUsers(response.data);
+
+        const defaultUser = response.data.find((u) => u.id === 1);
+        if (defaultUser) {
+          setCurrentUser(defaultUser);
+        } else if (response.data.length > 0) {
+          setCurrentUser(response.data[0]);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch users from database", err);
+      });
+  }, []);
+
+  // Update Axios interceptor whenever user changes
   useEffect(() => {
     setActiveUserId(currentUser.id);
   }, [currentUser]);

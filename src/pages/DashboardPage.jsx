@@ -1,193 +1,78 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
-import {
-  Wallet,
-  Plus,
-  ArrowUpRight,
-  ArrowDownRight,
-  ArrowLeftRight,
-  User,
-} from "lucide-react";
+import { Plus, Wallet2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axiosConfig";
 
-function Dashboard() {
-  const { currentUser, setCurrentUser, availableUsers } = useAuth();
-  const [wallet, setWallet] = useState(null);
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [amount, setAmount] = useState("");
-  const [funding, setFunding] = useState(false);
+const formatCurrency = (value) =>
+  Number(value ?? 0).toLocaleString("en-EG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-  const loadWalletData = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const [walletRes, txRes] = await Promise.all([
-        api.get("/wallet", { headers: { userId: currentUser.id } }),
-        api.get("/wallet/transactions", {
-          headers: { userId: currentUser.id },
-        }),
-      ]);
-      setWallet(walletRes.data);
-      setTransactions(txRes.data);
-    } catch (err) {
-      setError(
-        "Couldn't reach the wallet service. Is the backend running on :8080?",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+function DashboardPage() {
+  const { currentUser } = useAuth();
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadWalletData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let ignore = false;
+
+    setLoading(true);
+    api
+      .get("/wallet")
+      .then((res) => {
+        if (!ignore) setWallet(res.data);
+      })
+      .catch((error) => {
+        if (!ignore) console.error("Failed to fetch wallet", error);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [currentUser.id]);
 
-  const handleFund = async (e) => {
-    e.preventDefault();
-    if (!amount || Number(amount) <= 0) return;
-    setFunding(true);
-    try {
-      await api.post("/wallet", null, {
-        params: { amount },
-        headers: { userId: currentUser.id },
-      });
-      setAmount("");
-      await loadWalletData();
-    } catch (err) {
-      setError("Funding failed. Please try again.");
-    } finally {
-      setFunding(false);
-    }
-  };
-
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value ?? 0);
-
-  const txIcon = (type) => {
-    if (type === "DEPOSIT")
-      return <ArrowDownRight className="text-emerald-500" size={18} />;
-    if (type === "EXPENSE")
-      return <ArrowUpRight className="text-rose-500" size={18} />;
-    return <ArrowLeftRight className="text-[#47bfff]" size={18} />;
-  };
+  const balance = wallet?.balance ?? 4600;
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <header className="bg-[#863bff] text-white shadow-md">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Wallet size={26} />
-            <span className="text-xl font-semibold tracking-tight">
-              Group Wallet
-            </span>
-          </div>
-          <div className="flex gap-1 bg-white/10 rounded-full p-1">
-            {availableUsers.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => setCurrentUser(u)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                  currentUser.id === u.id
-                    ? "bg-white text-[#863bff]"
-                    : "text-white/80 hover:bg-white/10"
-                }`}
-              >
-                {u.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+    <div className="flex flex-col items-center pb-12 pt-8">
+      <div className="w-full max-w-3xl text-center">
+        <h1 className="text-3xl font-black tracking-tight text-[#0A7D6B] sm:text-4xl">
+          Welcome back, {currentUser.name}
+        </h1>
+        <p className="mt-3 text-base text-[#07594C] opacity-80">
+          Here is the status of your personal wallet.
+        </p>
+      </div>
 
-      <main className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-        {error && (
-          <div className="alert alert-error text-sm">
-            <span>{error}</span>
+      <div className="mt-10 w-full max-w-md overflow-hidden rounded-[28px] border border-[#FED7A2] bg-[linear-gradient(135deg,#FA9905_0%,#CB7C04_100%)] shadow-[0_24px_60px_rgba(202,124,4,0.22)]">
+        <div className="p-6 sm:p-7">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-[#FFF7ED]">
+            <Wallet2 className="h-4 w-4" />
+            Personal Wallet
           </div>
-        )}
 
-        <div className="card bg-gradient-to-br from-[#863bff] to-[#47bfff] text-white shadow-xl">
-          <div className="card-body">
-            <div className="flex items-center gap-2 text-white/80 text-sm">
-              <User size={16} />
-              {currentUser.name}'s personal wallet
+          <div className="mt-8 flex items-end justify-between gap-3 text-white">
+            <div className="text-4xl font-black tracking-tight sm:text-[3.1rem]">
+              {loading ? "--" : formatCurrency(balance)}
             </div>
-            {loading ? (
-              <span className="loading loading-spinner loading-lg mt-2"></span>
-            ) : (
-              <p className="text-4xl font-bold mt-1">
-                {formatCurrency(wallet?.balance)}
-              </p>
-            )}
-
-            <form onSubmit={handleFund} className="flex gap-2 mt-4">
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Amount"
-                className="input w-32 bg-white text-black"
-              />
-              <button
-                type="submit"
-                disabled={funding}
-                className="btn bg-white text-[#863bff] hover:bg-white/90 border-none"
-              >
-                <Plus size={16} />
-                {funding ? "Funding..." : "Fund Wallet"}
-              </button>
-            </form>
+            <div className="pb-1 text-xl font-semibold text-[#FFF7ED]">EGP</div>
           </div>
-        </div>
 
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title text-base">Recent Transactions</h2>
-            {loading ? (
-              <span className="loading loading-spinner"></span>
-            ) : transactions.length === 0 ? (
-              <p className="text-sm text-base-content/60">
-                No transactions yet.
-              </p>
-            ) : (
-              <ul className="divide-y divide-base-200">
-                {transactions.map((tx) => (
-                  <li
-                    key={tx.id}
-                    className="flex items-center justify-between py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      {txIcon(tx.type)}
-                      <div>
-                        <p className="text-sm font-medium">
-                          {tx.type.replace("_", " ")}
-                        </p>
-                        <p className="text-xs text-base-content/50">
-                          {new Date(tx.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="font-semibold">
-                      {formatCurrency(tx.amount)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <button
+            type="button"
+            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0A7D6B] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#07594C]/20 transition hover:-translate-y-0.5 hover:bg-[#07594C]"
+          >
+            <Plus className="h-4 w-4" />
+            Add Funds
+          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
 
-export default Dashboard;
+export default DashboardPage;

@@ -1,1 +1,41 @@
 @import "tailwindcss";
+
+:root {
+  --brand-orange: #fa9905;
+  --brand-orange-light: #fed7a2;
+  --brand-orange-dark: #cb7c04;
+  --brand-teal: #0a7d6b;
+  --brand-teal-light: #e8f6f4;
+  --brand-teal-dark: #07594c;
+  --text-white: #ffffff;
+  --bg-soft: #e8f6f4;
+  --ink: #1f2937;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(250, 153, 5, 0.18);
+}
