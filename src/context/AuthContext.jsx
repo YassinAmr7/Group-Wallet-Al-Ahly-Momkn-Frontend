@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { setActiveUserId } from "../api/axiosConfig";
-import api from "../api/axiosConfig"; // Import our axios instance
+import api from "../api/axiosConfig";
 
 const AuthContext = createContext();
 
