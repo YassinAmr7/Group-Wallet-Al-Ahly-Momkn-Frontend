@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Plus, Wallet2 } from "lucide-react";
+import { ArrowRight, Plus, Wallet2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axiosConfig";
 
@@ -11,6 +12,7 @@ const formatCurrency = (value) =>
 
 function DashboardPage() {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,13 +64,24 @@ function DashboardPage() {
             <div className="pb-1 text-xl font-semibold text-[#FFF7ED]">EGP</div>
           </div>
 
-          <button
-            type="button"
-            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0A7D6B] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#07594C]/20 transition hover:-translate-y-0.5 hover:bg-[#07594C]"
-          >
-            <Plus className="h-4 w-4" />
-            Add Funds
-          </button>
+          <div className="mt-8 flex gap-3">
+            <button
+              type="button"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#0A7D6B] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#07594C]/20 transition hover:-translate-y-0.5 hover:bg-[#07594C]"
+            >
+              <Plus className="h-4 w-4" />
+              Add Funds
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/groups")}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/50 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+            >
+              View Groups
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

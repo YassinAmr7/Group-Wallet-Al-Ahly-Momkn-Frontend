@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, WalletCards } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
@@ -22,6 +23,33 @@ function Navbar() {
             </p>
           </div>
         </div>
+
+        <nav className="hidden items-center gap-2 md:flex">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `rounded-xl px-3 py-2 text-sm font-bold transition ${
+                isActive
+                  ? "bg-white/15 text-white"
+                  : "text-[#E8F6F4] hover:bg-white/10"
+              }`
+            }
+          >
+            Dashboard
+          </NavLink>
+          <NavLink
+            to="/groups"
+            className={({ isActive }) =>
+              `rounded-xl px-3 py-2 text-sm font-bold transition ${
+                isActive
+                  ? "bg-white/15 text-white"
+                  : "text-[#E8F6F4] hover:bg-white/10"
+              }`
+            }
+          >
+            Groups
+          </NavLink>
+        </nav>
 
         <div className="relative">
           <button

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Plus, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { useAuth } from "../context/AuthContext";
@@ -54,14 +54,25 @@ function GroupsPage() {
           </h1>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/groups/new")}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FA9905] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#FA9905]/20 transition hover:-translate-y-0.5 hover:bg-[#CB7C04]"
-        >
-          <Plus className="h-4 w-4" />
-          Create group
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0A7D6B]/20 bg-white px-3 py-2 text-sm font-bold text-[#0A7D6B] transition hover:bg-[#E8F6F4]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/groups/new")}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FA9905] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#FA9905]/20 transition hover:-translate-y-0.5 hover:bg-[#CB7C04]"
+          >
+            <Plus className="h-4 w-4" />
+            Create group
+          </button>
+        </div>
       </div>
 
       {error && (
