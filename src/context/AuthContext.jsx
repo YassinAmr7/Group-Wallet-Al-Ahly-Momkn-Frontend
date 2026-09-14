@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { setActiveUserId } from "../api/axiosConfig";
 
 const AuthContext = createContext();
 
@@ -12,6 +13,10 @@ export const AuthProvider = ({ children }) => {
     { id: 2, name: "Junior Intern" },
     { id: 3, name: "Team Lead" },
   ];
+
+  useEffect(() => {
+    setActiveUserId(currentUser.id);
+  }, [currentUser]);
 
   return (
     <AuthContext.Provider

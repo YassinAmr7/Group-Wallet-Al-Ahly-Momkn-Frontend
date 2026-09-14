@@ -7,4 +7,17 @@ const api = axios.create({
   },
 });
 
+let activeUserId = null;
+
+export const setActiveUserId = (userId) => {
+  activeUserId = userId;
+};
+
+api.interceptors.request.use((config) => {
+  if (activeUserId != null) {
+    config.headers.userId = activeUserId;
+  }
+  return config;
+});
+
 export default api;
