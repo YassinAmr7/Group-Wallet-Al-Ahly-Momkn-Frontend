@@ -49,6 +49,18 @@ function Navbar() {
           >
             Groups
           </NavLink>
+          <NavLink
+            to="/transactions"
+            className={({ isActive }) =>
+              `rounded-xl px-3 py-2 text-sm font-bold transition ${
+                isActive
+                  ? "bg-white/15 text-white"
+                  : "text-[#E8F6F4] hover:bg-white/10"
+              }`
+            }
+          >
+            Transactions
+          </NavLink>
         </nav>
 
         <div className="relative">

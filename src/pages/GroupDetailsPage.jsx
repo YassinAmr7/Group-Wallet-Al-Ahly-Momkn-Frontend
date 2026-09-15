@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react";
 import api from "../api/axiosConfig";
+import TransactionList from "../components/TransactionList";
 
 const formatCurrency = (value) =>
   Number(value ?? 0).toLocaleString("en-EG", {
@@ -27,6 +28,9 @@ function GroupDetailsPage() {
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsError, setTransactionsError] = useState("");
 
   const fetchWallet = async () => {
     try {
@@ -38,6 +42,19 @@ function GroupDetailsPage() {
     }
   };
 
+  const fetchTransactions = async () => {
+    try {
+      const response = await api.get(`/api/groups/${groupId}/transactions`);
+      setTransactions(response.data || []);
+      setTransactionsError("");
+    } catch (err) {
+      setTransactions([]);
+      setTransactionsError(
+        "Unable to load this group's transactions right now.",
+      );
+    }
+  };
+
   useEffect(() => {
     let ignore = false;
 
@@ -46,12 +63,14 @@ function GroupDetailsPage() {
       setError("");
 
       try {
-        await fetchWallet();
+        setTransactionsLoading(true);
+        await Promise.all([fetchWallet(), fetchTransactions()]);
       } catch (err) {
         if (!ignore) {
           setError("Unable to load this group wallet right now.");
         }
       } finally {
+        setTransactionsLoading(false);
         if (!ignore) {
           setLoading(false);
         }
@@ -91,7 +110,7 @@ function GroupDetailsPage() {
       );
       setAmount("");
       setModalType(null);
-      await fetchWallet();
+      await Promise.all([fetchWallet(), fetchTransactions()]);
     } catch (err) {
       const backendMessage =
         err?.response?.data?.message ||
@@ -194,6 +213,38 @@ function GroupDetailsPage() {
           </div>
         </div>
       </div>
+
+      <section className="rounded-[28px] border border-[#E8F6F4] bg-white p-5 shadow-sm sm:p-7">
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#0A7D6B]">
+              Group activity
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-800">
+              Transaction report
+            </h2>
+          </div>
+          <span className="text-sm font-medium text-slate-500">
+            {transactionsLoading
+              ? "Loading..."
+              : `${transactions.length} record${transactions.length === 1 ? "" : "s"}`}
+          </span>
+        </div>
+
+        {transactionsError && (
+          <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+            {transactionsError}
+          </div>
+        )}
+
+        {transactionsLoading ? (
+          <div className="rounded-3xl border border-[#E8F6F4] bg-[#F8FCFB] p-8 text-center font-bold text-[#07594C]">
+            Loading transactions...
+          </div>
+        ) : (
+          <TransactionList transactions={transactions} scope="group" />
+        )}
+      </section>
 
       {modalType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">

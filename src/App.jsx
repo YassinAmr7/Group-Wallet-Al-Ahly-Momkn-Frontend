@@ -4,12 +4,14 @@ import DashboardPage from "./pages/DashboardPage";
 import GroupsPage from "./pages/GroupsPage";
 import CreateGroupPage from "./pages/CreateGroupPage";
 import GroupDetailsPage from "./pages/GroupDetailsPage";
+import TransactionsPage from "./pages/TransactionsPage";
 
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/groups" element={<GroupsPage />} />
         <Route path="/groups/new" element={<CreateGroupPage />} />
         <Route path="/groups/:groupId" element={<GroupDetailsPage />} />
