@@ -1,16 +1,32 @@
-# React + Vite
+# Group Wallet UI (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## 📌 Project Overview
+This is the frontend dashboard for the **Group Wallet System**, developed as a collaborative internship project at **Al Ahly Momkn**. This application provides a secure, intuitive interface for users to manage personal finances, participate in group wallets, and oversee financial contributions within their teams.
 
-Currently, two official plugins are available:
+The frontend is built as a **Single Page Application (SPA)** that interacts with our backend Modular Monolith, ensuring a seamless experience for managing deposits, expenses, and transaction reporting.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎨 Design Language
+- **Brand Identity**: Built with a corporate Teal (`#0A7D6B`) and Orange (`#FA9905`) palette, aligning with Al Ahly Momkn's design standards.
+- **Framework**: React with Vite.
+- **Styling**: Tailwind CSS for responsive design + DaisyUI for robust, professional component primitives.
 
-## React Compiler
+## 🚀 Key Frontend Features
+- **Dynamic User Simulation**: Allows developers to switch between users to test role-based access and permissions.
+- **Responsive Dashboard**: Real-time visualization of personal wallet balances and group treasury.
+- **Secure Transactions**: UI-driven flows for depositing funds and recording expenses with integrated error handling.
+- **Ledger Reporting**: Dedicated view for monitoring group transaction history.
+- **Dynamic Group Management**: Interface to create groups and navigate through active group memberships.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Technical Stack
+- **Library**: React 18
+- **Build Tool**: Vite
+- **HTTP Client**: Axios (with centralized Interceptors for auth-headers)
+- **Routing**: React Router DOM
+- **Icons**: Lucide-React
+- **UI Components**: Tailwind CSS & DaisyUI
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## ⚙️ How to Run
+1. **Prerequisites**: Ensure your Spring Boot backend is running on `localhost:8080`.
+2. **Install Dependencies**:
+   ```bash
+   npm install
