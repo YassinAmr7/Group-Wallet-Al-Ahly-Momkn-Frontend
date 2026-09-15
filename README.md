@@ -11,7 +11,7 @@ The frontend is built as a **Single Page Application (SPA)** that interacts with
 - **Styling**: Tailwind CSS for responsive design + DaisyUI for robust, professional component primitives.
 
 ## 🚀 Key Frontend Features
-- **Dynamic User Simulation**: Allows developers to switch between pre-seeded users (Khaled, Intern, Team Lead) to test role-based access and permissions.
+- **Dynamic User Simulation**: Allows developers to switch between users to test role-based access and permissions.
 - **Responsive Dashboard**: Real-time visualization of personal wallet balances and group treasury.
 - **Secure Transactions**: UI-driven flows for depositing funds and recording expenses with integrated error handling.
 - **Ledger Reporting**: Dedicated view for monitoring group transaction history.
