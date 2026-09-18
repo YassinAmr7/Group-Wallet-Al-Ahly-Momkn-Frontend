@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import api from "../api/axiosConfig";
 import TransactionList from "../components/TransactionList";
+import { useAuth } from "../context/AuthContext";
 
 const formatCurrency = (value) =>
   Number(value ?? 0).toLocaleString("en-EG", {
@@ -20,6 +21,7 @@ function GroupDetailsPage() {
   const { groupId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser, availableUsers } = useAuth();
   const groupNameFromState = location.state?.groupName;
   const [wallet, setWallet] = useState({ balance: 0 });
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,10 @@ function GroupDetailsPage() {
   const [transactions, setTransactions] = useState([]);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [transactionsError, setTransactionsError] = useState("");
+  const [members, setMembers] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersError, setMembersError] = useState("");
+  const [roleUpdating, setRoleUpdating] = useState(null);
 
   const fetchWallet = async () => {
     try {
@@ -55,6 +61,17 @@ function GroupDetailsPage() {
     }
   };
 
+  const fetchMembers = async () => {
+    try {
+      const response = await api.get(`/api/groups/${groupId}/members`);
+      setMembers(response.data || []);
+      setMembersError("");
+    } catch (err) {
+      setMembers([]);
+      setMembersError("Unable to load this group's members right now.");
+    }
+  };
+
   useEffect(() => {
     let ignore = false;
 
@@ -64,13 +81,15 @@ function GroupDetailsPage() {
 
       try {
         setTransactionsLoading(true);
-        await Promise.all([fetchWallet(), fetchTransactions()]);
+        setMembersLoading(true);
+        await Promise.all([fetchWallet(), fetchTransactions(), fetchMembers()]);
       } catch (err) {
         if (!ignore) {
           setError("Unable to load this group wallet right now.");
         }
       } finally {
         setTransactionsLoading(false);
+        setMembersLoading(false);
         if (!ignore) {
           setLoading(false);
         }
@@ -122,6 +141,27 @@ function GroupDetailsPage() {
     }
   };
 
+  const handleRoleChange = async (targetUserId, role) => {
+    setRoleUpdating(targetUserId);
+
+    try {
+      await api.put(
+        `/api/groups/${groupId}/members/${targetUserId}/role`,
+        null,
+        { params: { role } },
+      );
+      await fetchMembers();
+    } catch (err) {
+      setMembersError(
+        err?.response?.data?.message ||
+          err?.response?.data ||
+          "The member role could not be updated.",
+      );
+    } finally {
+      setRoleUpdating(null);
+    }
+  };
+
   const quickActions = useMemo(
     () => [
       {
@@ -141,6 +181,11 @@ function GroupDetailsPage() {
   );
 
   const displayName = groupNameFromState || `Group #${groupId}`;
+  const currentMember = members.find(
+    (member) => member.userId === currentUser.id,
+  );
+  const isModerator = currentMember?.roles?.includes("MODERATOR");
+  const canExecuteExpense = currentMember?.roles?.includes("TREASURER");
 
   return (
     <div className="space-y-8 pb-12 pt-4">
@@ -199,20 +244,108 @@ function GroupDetailsPage() {
           </div>
 
           <div className="space-y-4">
-            {quickActions.map(({ label, icon: Icon, color, action }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setModalType(action)}
-                className={`flex w-full items-center justify-between rounded-2xl ${color} px-4 py-4 text-left text-white shadow-md transition hover:brightness-105`}
-              >
-                <span className="text-lg font-bold">{label}</span>
-                <Icon className="h-5 w-5" />
-              </button>
-            ))}
+            {quickActions
+              .filter(({ action }) => action !== "expense" || canExecuteExpense)
+              .map(({ label, icon: Icon, color, action }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setModalType(action)}
+                  className={`flex w-full items-center justify-between rounded-2xl ${color} px-4 py-4 text-left text-white shadow-md transition hover:brightness-105`}
+                >
+                  <span className="text-lg font-bold">{label}</span>
+                  <Icon className="h-5 w-5" />
+                </button>
+              ))}
           </div>
         </div>
       </div>
+
+      <section className="rounded-[28px] border border-[#E8F6F4] bg-white p-5 shadow-sm sm:p-7">
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#0A7D6B]">
+              Access control
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-800">Members</h2>
+          </div>
+          <span className="text-sm font-medium text-slate-500">
+            {membersLoading
+              ? "Loading..."
+              : `${members.length} member${members.length === 1 ? "" : "s"}`}
+          </span>
+        </div>
+
+        {membersError && (
+          <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+            {membersError}
+          </div>
+        )}
+
+        {membersLoading ? (
+          <div className="rounded-3xl border border-[#E8F6F4] bg-[#F8FCFB] p-8 text-center font-bold text-[#07594C]">
+            Loading members...
+          </div>
+        ) : members.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-[#0A7D6B]/25 bg-[#F8FCFB] p-8 text-center text-slate-500">
+            No members found.
+          </div>
+        ) : (
+          <div className="divide-y divide-[#E8F6F4]">
+            {members.map((member) => {
+              const user = availableUsers.find(
+                (item) => item.id === member.userId,
+              );
+              const memberName = user?.name || `User #${member.userId}`;
+
+              return (
+                <div
+                  key={member.id}
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-bold text-slate-800">{memberName}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {member.roles?.map((role) => (
+                        <span
+                          key={role}
+                          className="rounded-full bg-[#E8F6F4] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#07594C]"
+                        >
+                          {role.toLowerCase()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {isModerator && member.userId !== currentUser.id && (
+                    <label className="flex items-center gap-2 text-sm font-bold text-[#07594C]">
+                      Role
+                      <select
+                        value={
+                          member.roles?.includes("MODERATOR")
+                            ? "MODERATOR"
+                            : member.roles?.includes("TREASURER")
+                              ? "TREASURER"
+                              : "MEMBER"
+                        }
+                        disabled={roleUpdating === member.userId}
+                        onChange={(event) =>
+                          handleRoleChange(member.userId, event.target.value)
+                        }
+                        className="rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#FA9905] focus:ring-4 focus:ring-[#FED7A2]"
+                      >
+                        <option value="MEMBER">Member</option>
+                        <option value="TREASURER">Treasurer</option>
+                        <option value="MODERATOR">Moderator</option>
+                      </select>
+                    </label>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <section className="rounded-[28px] border border-[#E8F6F4] bg-white p-5 shadow-sm sm:p-7">
         <div className="mb-5 flex items-end justify-between gap-3">
