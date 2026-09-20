@@ -80,7 +80,7 @@ function DashboardPage() {
           Welcome back, {currentUser.name}
         </h1>
         <p className="mt-3 text-base text-[#07594C] opacity-80">
-          Here is the status of your personal wallet.
+          Here is the status of your personal wallet
         </p>
       </div>
 
